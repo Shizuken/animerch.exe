@@ -13,12 +13,23 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        pixel: ['"Press Start 2P"', "system-ui", "monospace"],
+        body: ['Nunito', "system-ui", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        ink: "hsl(var(--ink))",
+        cloud: "hsl(var(--cloud))",
+        "sky-accent": "hsl(var(--sky-accent))",
+        "pixel-shadow": "hsl(var(--pixel-shadow))",
+        blush: "hsl(var(--blush))",
+        gold: "hsl(var(--gold))",
+        grass: "hsl(var(--grass))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
