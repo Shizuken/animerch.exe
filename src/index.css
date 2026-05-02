@@ -204,5 +204,4 @@
   background:
     linear-gradient(45deg, transparent 40%, hsl(var(--ink)) 40% 60%, transparent 60%),
     linear-gradient(-45deg, transparent 40%, hsl(var(--ink)) 40% 60%, transparent 60%);
-  }
 }
