@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { PRODUCT_CATEGORIES, Product } from "@/data/animerch";
+import { Product, formatIDR } from "@/data/animerch";
 import { useAnimerchStore } from "@/store/animerchStore";
 import { ProductCard } from "./ProductCard";
 import { FilterPanel } from "./FilterPanel";
@@ -10,28 +10,31 @@ type Sort = (typeof SORTS)[number];
 
 export function ProductsPage({ onPick }: { onPick: (p: Product) => void }) {
   const PRODUCTS = useAnimerchStore((s) => s.products);
-  const [cats, setCats] = useState<string[]>([]);
-  const [maxPrice, setMaxPrice] = useState(6000);
+  const cats = useAnimerchStore((s) => s.productCategories);
+  const sortedCats = [...cats].sort((a, b) => a.name.localeCompare(b.name));
+  const minP = PRODUCTS.length ? Math.min(...PRODUCTS.map((p) => p.price)) : 0;
+  const maxP = PRODUCTS.length ? Math.max(...PRODUCTS.map((p) => p.price)) : 1000000;
+  const [catIds, setCatIds] = useState<string[]>([]);
+  const [maxPrice, setMaxPrice] = useState(maxP);
   const [sort, setSort] = useState<Sort>("Newest");
   const [loading, setLoading] = useState(false);
 
   const filtered = useMemo(() => {
-    let list = PRODUCTS.filter((p) => p.price <= maxPrice && (cats.length === 0 || cats.includes(p.category)));
+    let list = PRODUCTS.filter((p) =>
+      p.price <= maxPrice &&
+      (catIds.length === 0 || (p.category_id && catIds.includes(p.category_id)))
+    );
     switch (sort) {
       case "Price Low→High": list = [...list].sort((a, b) => a.price - b.price); break;
       case "Price High→Low": list = [...list].sort((a, b) => b.price - a.price); break;
       case "Name A–Z":       list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
     }
     return list;
-  }, [cats, maxPrice, sort, PRODUCTS]);
+  }, [catIds, maxPrice, sort, PRODUCTS]);
 
-  const apply = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 300);
-  };
-
-  const toggleCat = (c: string) =>
-    setCats((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  const apply = () => { setLoading(true); setTimeout(() => setLoading(false), 300); };
+  const toggleCat = (id: string) =>
+    setCatIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   return (
     <section className="container py-8">
@@ -40,32 +43,22 @@ export function ProductsPage({ onPick }: { onPick: (p: Product) => void }) {
           <div>
             <p className="font-pixel text-[8px] text-ink mb-2">CATEGORY</p>
             <div className="space-y-2">
-              {PRODUCT_CATEGORIES.map((c) => (
-                <PixelCheckbox key={c} label={c} checked={cats.includes(c)} onChange={() => toggleCat(c)} />
+              {sortedCats.map((c) => (
+                <PixelCheckbox key={c.id} label={c.name} checked={catIds.includes(c.id)} onChange={() => toggleCat(c.id)} />
               ))}
             </div>
           </div>
           <div>
-            <p className="font-pixel text-[8px] text-ink mb-2">MAX PRICE: ¥ {maxPrice.toLocaleString()}</p>
-            <input
-              type="range"
-              min={500}
-              max={6000}
-              step={100}
-              value={maxPrice}
+            <p className="font-pixel text-[8px] text-ink mb-2">MAX PRICE: {formatIDR(maxPrice)}</p>
+            <input type="range" min={minP} max={maxP || 1} step={1000} value={maxPrice}
               onChange={(e) => setMaxPrice(parseInt(e.target.value, 10))}
-              className="w-full accent-ink"
-              aria-label="Maximum price"
-            />
+              className="w-full accent-ink" aria-label="Maximum price" />
           </div>
           <div>
             <p className="font-pixel text-[8px] text-ink mb-2">SORT BY</p>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as Sort)}
+            <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}
               className="w-full bg-card border-[3px] border-ink p-2 font-body text-sm text-ink focus:outline-none"
-              style={{ boxShadow: "3px 3px 0 0 hsl(var(--pixel-shadow))" }}
-            >
+              style={{ boxShadow: "3px 3px 0 0 hsl(var(--pixel-shadow))" }}>
               {SORTS.map((s) => <option key={s}>{s}</option>)}
             </select>
           </div>
@@ -78,7 +71,6 @@ export function ProductsPage({ onPick }: { onPick: (p: Product) => void }) {
               {loading ? <span className="cursor-blink font-pixel text-[10px]">LOADING…</span> : `Showing ${filtered.length} items`}
             </p>
           </div>
-
           {filtered.length === 0 ? (
             <div className="pixel-box bg-cloud p-10 text-center font-body text-ink">
               <p className="font-pixel text-[10px] mb-2">[ EMPTY ]</p>
