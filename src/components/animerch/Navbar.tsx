@@ -1,4 +1,5 @@
 import { PixelButton } from "./PixelButton";
+import { Link } from "react-router-dom";
 
 export type Tab = "home" | "products" | "gallery";
 
@@ -33,6 +34,11 @@ export function Navbar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void
               {t.label}
             </PixelButton>
           ))}
+          <Link to="/admin">
+            <PixelButton className="text-[8px] sm:text-[10px] px-2 py-2 sm:px-3 sm:py-3" style={{ background: "hsl(var(--gold))" }}>
+              DB
+            </PixelButton>
+          </Link>
         </nav>
       </div>
     </header>
