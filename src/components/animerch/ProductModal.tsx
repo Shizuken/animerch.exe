@@ -1,8 +1,10 @@
 import { useEffect } from "react";
-import { Product } from "@/data/animerch";
+import { Product, formatIDR } from "@/data/animerch";
+import { categoryName, useAnimerchStore } from "@/store/animerchStore";
 import { PixelButton } from "./PixelButton";
 
 export function ProductModal({ product, onClose }: { product: Product | null; onClose: () => void }) {
+  const cats = useAnimerchStore((s) => s.productCategories);
   useEffect(() => {
     if (!product) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -53,22 +55,24 @@ export function ProductModal({ product, onClose }: { product: Product | null; on
 
         <div className="grid md:grid-cols-2 gap-6 p-6">
           <div
-            className="aspect-square border-[3px] border-ink relative grid place-items-center"
+            className="aspect-square border-[3px] border-ink relative grid place-items-center overflow-hidden"
             style={{ background: product.imageBg }}
           >
-            <div className="text-[8rem] select-none">{product.emoji}</div>
+            {product.image
+              ? <img src={product.image} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
+              : <div className="text-[8rem] select-none">{product.emoji}</div>}
             <span className="absolute bottom-2 right-2 font-pixel text-[8px] bg-white border-2 border-ink px-2 py-1">🔍 ZOOM</span>
           </div>
 
           <div className="flex flex-col gap-3">
             <p className="font-pixel text-[10px] text-ink/70">[ ITEM INFO ]</p>
             <h2 className="font-pixel text-base text-ink leading-snug">{product.name}</h2>
-            <p className="font-body font-extrabold text-2xl text-ink">¥ {product.price.toLocaleString()}</p>
+            <p className="font-body font-extrabold text-2xl text-ink">{formatIDR(product.price)}</p>
             <div className="pixel-divider" />
             <ul className="font-body text-sm text-ink space-y-1">
               <li>📐 {product.dims.l} × {product.dims.w} × {product.dims.h} cm</li>
               <li>⚖️ {product.weight} g</li>
-              <li>🏷️ {product.category}</li>
+              <li>🏷️ {categoryName(cats, product.category_id)}</li>
             </ul>
             <div className="pixel-divider" />
             <p className="font-body text-sm text-ink/80 max-h-32 overflow-auto pr-2">
