@@ -30,6 +30,9 @@ export default {
         blush: "hsl(var(--blush))",
         gold: "hsl(var(--gold))",
         grass: "hsl(var(--grass))",
+        "admin-success": "hsl(var(--admin-success))",
+        "admin-danger": "hsl(var(--admin-danger))",
+        "admin-warning": "hsl(var(--admin-warning))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
