@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { animerchStore, useAnimerchStore } from "@/store/animerchStore";
-import { GALLERY_SERIES, GalleryItem } from "@/data/animerch";
+import { animerchStore, categoryName, useAnimerchStore } from "@/store/animerchStore";
+import { GalleryItem } from "@/data/animerch";
 import { PixelButton } from "@/components/animerch/PixelButton";
 import { PixelCheckbox } from "@/components/animerch/PixelCheckbox";
 import { GalleryFormModal } from "./GalleryFormModal";
@@ -18,7 +18,9 @@ function fmt(d: string) {
 
 export function GalleryDB() {
   const items = useAnimerchStore((s) => s.gallery);
-  const [series, setSeries] = useState<string[]>([]);
+  const cats = useAnimerchStore((s) => s.galleryCategories);
+  const sortedCats = [...cats].sort((a, b) => a.name.localeCompare(b.name));
+  const [catIds, setCatIds] = useState<string[]>([]);
   const [year, setYear] = useState("All");
   const [sort, setSort] = useState<Sort>("Newest First");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -27,19 +29,24 @@ export function GalleryDB() {
   const [deleting, setDeleting] = useState<GalleryItem | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
+  const years = useMemo(() => {
+    const ys = new Set(items.map((g) => g.date.slice(0, 4)));
+    return ["All", ...Array.from(ys).sort().reverse()];
+  }, [items]);
+
   const filtered = useMemo(() => {
     let list = items.filter((g) =>
-      (series.length === 0 || series.includes(g.series)) &&
+      (catIds.length === 0 || (g.category_id && catIds.includes(g.category_id))) &&
       (year === "All" || g.date.startsWith(year))
     );
     if (sort === "Newest First") list = [...list].sort((a, b) => b.date.localeCompare(a.date));
     if (sort === "Oldest First") list = [...list].sort((a, b) => a.date.localeCompare(b.date));
     if (sort === "Name A–Z") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  }, [items, series, year, sort]);
+  }, [items, catIds, year, sort]);
 
-  const toggle = (s: string) => setSeries((p) => (p.includes(s) ? p.filter((x) => x !== s) : [...p, s]));
-  const reset = () => { setSeries([]); setYear("All"); setSort("Newest First"); };
+  const toggle = (id: string) => setCatIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const reset = () => { setCatIds([]); setYear("All"); setSort("Newest First"); };
 
   const confirmDelete = () => {
     if (!deleting) return;
@@ -60,15 +67,15 @@ export function GalleryDB() {
         <div>
           <p className="font-pixel text-[8px] text-ink mb-2">SERIES</p>
           <div className="space-y-2">
-            {GALLERY_SERIES.map((s) => (
-              <PixelCheckbox key={s} label={s} checked={series.includes(s)} onChange={() => toggle(s)} />
+            {sortedCats.map((c) => (
+              <PixelCheckbox key={c.id} label={c.name} checked={catIds.includes(c.id)} onChange={() => toggle(c.id)} />
             ))}
           </div>
         </div>
         <div>
           <p className="font-pixel text-[8px] text-ink mb-2">YEAR</p>
           <select value={year} onChange={(e) => setYear(e.target.value)} className="pixel-input">
-            <option>All</option><option>2023</option><option>2024</option><option>2025</option><option>2026</option>
+            {years.map((y) => <option key={y}>{y}</option>)}
           </select>
         </div>
         <div>
@@ -115,14 +122,14 @@ export function GalleryDB() {
           <div className="border-t-2 border-ink">
             {filtered.map((g) => (
               <div key={g.id} className={`row-card ${removingId === g.id ? "row-removing" : ""}`}>
-                <div className="w-12 h-12 border-2 border-ink grid place-items-center text-2xl" style={{ background: g.bg }}>
-                  {g.emoji}
+                <div className="w-12 h-12 border-2 border-ink grid place-items-center text-2xl overflow-hidden" style={{ background: g.bg }}>
+                  {g.image ? <img src={g.image} alt={g.name} className="w-full h-full object-cover" /> : <span>{g.emoji}</span>}
                 </div>
                 <div className="min-w-0">
                   <p className="font-pixel text-[8px] text-ink leading-snug truncate">{g.name}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="font-body text-ink/60 text-xs">{fmt(g.date)}</span>
-                    <span className="pill">{g.series}</span>
+                    <span className="pill">{categoryName(cats, g.category_id)}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -156,6 +163,7 @@ export function GalleryDB() {
         onConfirm={confirmDelete}
         title="DELETE IMAGE?"
         name={deleting?.name ?? ""}
+        image={deleting?.image}
         emoji={deleting?.emoji}
         bg={deleting?.bg}
       />

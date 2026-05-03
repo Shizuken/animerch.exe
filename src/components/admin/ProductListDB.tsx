@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { animerchStore, useAnimerchStore } from "@/store/animerchStore";
-import { PRODUCT_CATEGORIES, Product } from "@/data/animerch";
+import { animerchStore, categoryName, useAnimerchStore } from "@/store/animerchStore";
+import { Product, formatIDR } from "@/data/animerch";
 import { PixelButton } from "@/components/animerch/PixelButton";
 import { PixelCheckbox } from "@/components/animerch/PixelCheckbox";
 import { ProductFormModal } from "./ProductFormModal";
@@ -12,8 +12,12 @@ type Sort = (typeof SORTS)[number];
 
 export function ProductListDB() {
   const products = useAnimerchStore((s) => s.products);
-  const [cats, setCats] = useState<string[]>([]);
-  const [maxPrice, setMaxPrice] = useState(6000);
+  const cats = useAnimerchStore((s) => s.productCategories);
+  const sortedCats = [...cats].sort((a, b) => a.name.localeCompare(b.name));
+  const minP = products.length ? Math.min(...products.map((p) => p.price)) : 0;
+  const maxP = products.length ? Math.max(...products.map((p) => p.price)) : 1000000;
+  const [catIds, setCatIds] = useState<string[]>([]);
+  const [maxPrice, setMaxPrice] = useState(maxP);
   const [sort, setSort] = useState<Sort>("Newest");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -22,15 +26,18 @@ export function ProductListDB() {
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
-    let list = products.filter((p) => p.price <= maxPrice && (cats.length === 0 || cats.includes(p.category)));
+    let list = products.filter((p) =>
+      p.price <= maxPrice &&
+      (catIds.length === 0 || (p.category_id && catIds.includes(p.category_id)))
+    );
     if (sort === "Price Low→High") list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "Price High→Low") list = [...list].sort((a, b) => b.price - a.price);
     if (sort === "Name A–Z") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  }, [products, cats, maxPrice, sort]);
+  }, [products, catIds, maxPrice, sort]);
 
-  const toggleCat = (c: string) => setCats((p) => (p.includes(c) ? p.filter((x) => x !== c) : [...p, c]));
-  const reset = () => { setCats([]); setMaxPrice(6000); setSort("Newest"); };
+  const toggleCat = (id: string) => setCatIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const reset = () => { setCatIds([]); setMaxPrice(maxP); setSort("Newest"); };
 
   const confirmDelete = () => {
     if (!deleting) return;
@@ -51,14 +58,14 @@ export function ProductListDB() {
         <div>
           <p className="font-pixel text-[8px] text-ink mb-2">CATEGORY</p>
           <div className="space-y-2">
-            {PRODUCT_CATEGORIES.map((c) => (
-              <PixelCheckbox key={c} label={c} checked={cats.includes(c)} onChange={() => toggleCat(c)} />
+            {sortedCats.map((c) => (
+              <PixelCheckbox key={c.id} label={c.name} checked={catIds.includes(c.id)} onChange={() => toggleCat(c.id)} />
             ))}
           </div>
         </div>
         <div>
-          <p className="font-pixel text-[8px] text-ink mb-2">MAX PRICE: ¥ {maxPrice.toLocaleString()}</p>
-          <input type="range" min={500} max={6000} step={100} value={maxPrice}
+          <p className="font-pixel text-[8px] text-ink mb-2">MAX PRICE: {formatIDR(maxPrice)}</p>
+          <input type="range" min={minP} max={maxP || 1} step={1000} value={maxPrice}
             onChange={(e) => setMaxPrice(parseInt(e.target.value, 10))} className="w-full accent-ink" />
         </div>
         <div>
@@ -111,8 +118,8 @@ export function ProductListDB() {
                 <div className="min-w-0">
                   <p className="font-pixel text-[8px] text-ink leading-snug truncate">{p.name}</p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <span className="font-body font-bold text-ink text-sm">¥ {p.price.toLocaleString()}</span>
-                    <span className="pill">{p.category}</span>
+                    <span className="font-body font-bold text-ink text-sm">{formatIDR(p.price)}</span>
+                    <span className="pill">{categoryName(cats, p.category_id)}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">

@@ -12,23 +12,20 @@ export function HomePage({
   onPick: (p: Product) => void;
 }) {
   const products = useAnimerchStore((s) => s.products);
-  const featuredIds = useAnimerchStore((s) => s.featuredIds);
-  const featured = featuredIds
-    .map((id) => products.find((p) => p.id === id))
+  const featured = useAnimerchStore((s) => s.featured);
+  const items = featured
+    .map((id) => (id ? products.find((p) => p.id === id) : null))
     .filter(Boolean) as Product[];
-  const display = featured.length > 0 ? featured : products.slice(0, 3);
+  const display = items.length > 0 ? items : products.slice(0, 3);
+
   return (
     <section className="relative">
       <div className="container py-12 md:py-20 text-center relative">
-        {/* Twinkling pixels */}
         {[
           { t: 40, l: 8 }, { t: 20, l: 80 }, { t: 60, l: 20 }, { t: 90, l: 70 },
         ].map((s, i) => (
-          <span
-            key={i}
-            className="absolute w-2 h-2 bg-white twinkle pointer-events-none"
-            style={{ top: `${s.t}px`, left: `${s.l}%`, animationDelay: `${i * 0.4}s` }}
-          />
+          <span key={i} className="absolute w-2 h-2 bg-white twinkle pointer-events-none"
+            style={{ top: `${s.t}px`, left: `${s.l}%`, animationDelay: `${i * 0.4}s` }} />
         ))}
 
         <div className="float-2 mx-auto mb-6 w-[280px] sm:w-[360px]">
