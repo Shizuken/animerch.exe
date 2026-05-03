@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { GALLERY, GALLERY_SERIES, GalleryItem } from "@/data/animerch";
+import { GALLERY_SERIES, GalleryItem } from "@/data/animerch";
+import { useAnimerchStore } from "@/store/animerchStore";
 import { FilterPanel } from "./FilterPanel";
 import { PixelCheckbox } from "./PixelCheckbox";
 import { PixelButton } from "./PixelButton";
@@ -14,6 +15,7 @@ function fmtDate(d: string) {
 }
 
 export function GalleryPage() {
+  const GALLERY = useAnimerchStore((s) => s.gallery);
   const [series, setSeries] = useState<string[]>([]);
   const [sort, setSort] = useState<Sort>("Newest First");
   const [openIdx, setOpenIdx] = useState<number | null>(null);
@@ -26,7 +28,7 @@ export function GalleryPage() {
       case "Name A–Z":     list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
     }
     return list;
-  }, [series, sort]);
+  }, [series, sort, GALLERY]);
 
   const toggle = (s: string) =>
     setSeries((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));

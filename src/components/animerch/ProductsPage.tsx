@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { PRODUCT_CATEGORIES, PRODUCTS, Product } from "@/data/animerch";
+import { PRODUCT_CATEGORIES, Product } from "@/data/animerch";
+import { useAnimerchStore } from "@/store/animerchStore";
 import { ProductCard } from "./ProductCard";
 import { FilterPanel } from "./FilterPanel";
 import { PixelCheckbox } from "./PixelCheckbox";
@@ -8,6 +9,7 @@ const SORTS = ["Newest", "Price Low→High", "Price High→Low", "Name A–Z"] a
 type Sort = (typeof SORTS)[number];
 
 export function ProductsPage({ onPick }: { onPick: (p: Product) => void }) {
+  const PRODUCTS = useAnimerchStore((s) => s.products);
   const [cats, setCats] = useState<string[]>([]);
   const [maxPrice, setMaxPrice] = useState(6000);
   const [sort, setSort] = useState<Sort>("Newest");
@@ -21,7 +23,7 @@ export function ProductsPage({ onPick }: { onPick: (p: Product) => void }) {
       case "Name A–Z":       list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
     }
     return list;
-  }, [cats, maxPrice, sort]);
+  }, [cats, maxPrice, sort, PRODUCTS]);
 
   const apply = () => {
     setLoading(true);

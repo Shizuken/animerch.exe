@@ -1,7 +1,8 @@
 import { CloudIsland } from "./CloudIsland";
 import { PixelButton } from "./PixelButton";
 import { ProductCard } from "./ProductCard";
-import { PRODUCTS, Product } from "@/data/animerch";
+import { Product } from "@/data/animerch";
+import { useAnimerchStore } from "@/store/animerchStore";
 
 export function HomePage({
   onEnterShop,
@@ -10,7 +11,12 @@ export function HomePage({
   onEnterShop: () => void;
   onPick: (p: Product) => void;
 }) {
-  const featured = PRODUCTS.slice(0, 3);
+  const products = useAnimerchStore((s) => s.products);
+  const featuredIds = useAnimerchStore((s) => s.featuredIds);
+  const featured = featuredIds
+    .map((id) => products.find((p) => p.id === id))
+    .filter(Boolean) as Product[];
+  const display = featured.length > 0 ? featured : products.slice(0, 3);
   return (
     <section className="relative">
       <div className="container py-12 md:py-20 text-center relative">
@@ -46,7 +52,7 @@ export function HomePage({
       <div className="container pb-16">
         <h2 className="font-pixel text-xs sm:text-sm text-center text-ink mb-6">[ FEATURED ITEMS ]</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {featured.map((p) => (
+          {display.map((p) => (
             <ProductCard key={p.id} product={p} onClick={() => onPick(p)} />
           ))}
         </div>

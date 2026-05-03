@@ -18,6 +18,11 @@
     --gold: 50 100% 71%;              /* #ffe76a */
     --grass: 110 30% 55%;
 
+    /* Admin status colors */
+    --admin-success: 134 41% 85%;   /* #d4edda */
+    --admin-danger:  354 70% 91%;   /* #f8d7da */
+    --admin-warning: 49 100% 90%;   /* #fff3cd */
+
     --card: 0 0% 100%;
     --card-foreground: 224 42% 30%;
     --popover: 0 0% 100%;
@@ -205,3 +210,98 @@
     linear-gradient(45deg, transparent 40%, hsl(var(--ink)) 40% 60%, transparent 60%),
     linear-gradient(-45deg, transparent 40%, hsl(var(--ink)) 40% 60%, transparent 60%);
 }
+
+/* ===== Admin / DB styles ===== */
+.admin-titlebar {
+  background: hsl(var(--ink));
+  color: #fff;
+  padding: 8px 12px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  border: 3px solid hsl(var(--ink));
+  box-shadow: 4px 4px 0 0 hsl(var(--pixel-shadow));
+}
+.admin-panel {
+  background: hsl(var(--card));
+  border: 3px solid hsl(var(--ink));
+  box-shadow: 6px 6px 0 0 hsl(var(--pixel-shadow));
+}
+.admin-tab {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 10px 14px;
+  border: 3px solid hsl(var(--ink));
+  border-bottom: none;
+  background: hsl(var(--sky-accent));
+  color: hsl(var(--ink));
+  cursor: pointer;
+  position: relative;
+  top: 3px;
+  transition: top .1s;
+}
+.admin-tab[data-active="true"] {
+  background: #fff;
+  top: 0;
+  z-index: 2;
+}
+.admin-tab[data-active="true"]::after {
+  /* mask the panel's top border under active tab */
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -3px;
+  height: 3px;
+  background: #fff;
+}
+.pixel-input {
+  background: #fff;
+  border: 2px solid hsl(var(--ink));
+  padding: 8px 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: hsl(var(--ink));
+  outline: none;
+  width: 100%;
+}
+.pixel-input:focus { background: hsl(var(--background)); }
+.pixel-input.invalid { border-color: hsl(var(--admin-danger)); background: hsl(var(--admin-danger) / .3); }
+.pixel-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: hsl(var(--ink));
+  display: block;
+  margin-bottom: 6px;
+  letter-spacing: .5px;
+}
+.row-card {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  background: #fff;
+  border-bottom: 2px solid hsl(var(--ink));
+  transition: background .15s;
+}
+.row-card:hover { background: hsl(var(--cloud)); }
+.pill {
+  display: inline-block;
+  background: hsl(var(--sky-accent));
+  color: hsl(var(--ink));
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 2px solid hsl(var(--ink));
+}
+.empty-slot {
+  border: 3px dashed hsl(var(--sky-accent));
+  background: hsl(var(--cloud));
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 16px;
+}
+@keyframes fade-out-row { to { opacity: 0; transform: translateX(40px); } }
+.row-removing { animation: fade-out-row .25s ease-out forwards; }
