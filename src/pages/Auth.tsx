@@ -86,7 +86,7 @@ export default function Auth() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pixel-input w-full mt-1"
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                autoComplete="current-password"
               />
             </label>
             <PixelButton type="submit" variant="primary" disabled={loading} className="w-full text-[10px]">
