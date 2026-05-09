@@ -6,6 +6,7 @@ import { HomeDB } from "@/components/admin/HomeDB";
 import { ProductListDB } from "@/components/admin/ProductListDB";
 import { GalleryDB } from "@/components/admin/GalleryDB";
 import { ToastHost } from "@/components/admin/AdminToast";
+import { supabase } from "@/integrations/supabase/client";
 
 type DBTab = "home" | "products" | "gallery";
 const TABS: { id: DBTab; label: string }[] = [
@@ -34,6 +35,12 @@ export default function Admin() {
           <Link to="/">
             <PixelButton className="text-[8px] sm:text-[10px]">← BACK TO SITE</PixelButton>
           </Link>
+          <PixelButton
+            className="text-[8px] sm:text-[10px]"
+            onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }}
+          >
+            SIGN OUT
+          </PixelButton>
         </div>
       </header>
 
