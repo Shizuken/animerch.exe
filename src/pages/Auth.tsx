@@ -122,7 +122,7 @@ export default function Auth() {
           </button>
 
           <p className="mt-4 font-body text-xs text-ink/70 text-center">
-            The first account to register becomes the admin. Everyone else is a regular user.
+            Only the admin can log in to access the database.
           </p>
         </div>
       </main>
