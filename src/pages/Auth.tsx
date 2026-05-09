@@ -6,11 +6,8 @@ import { PixelButton } from "@/components/animerch/PixelButton";
 import { Footer } from "@/components/animerch/Footer";
 import { toast } from "@/hooks/use-toast";
 
-type Mode = "login" | "signup";
-
 export default function Auth() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,18 +28,8 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/admin` },
-        });
-        if (error) throw error;
-        toast({ title: "Check your inbox", description: "Confirm your email to finish signing up." });
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
     } catch (err: any) {
       toast({ title: "Auth error", description: err.message ?? String(err), variant: "destructive" });
     } finally {
@@ -74,7 +61,7 @@ export default function Auth() {
       <main className="flex-1 container py-12 flex items-center justify-center">
         <div className="pixel-box bg-card p-6 w-full max-w-md">
           <div className="admin-titlebar mb-4 flex items-center justify-between">
-            <span>[ {mode === "login" ? "LOGIN" : "REGISTER"}.EXE ]</span>
+            <span>[ LOGIN.EXE ]</span>
             <span className="cursor-blink">_</span>
           </div>
 
@@ -99,11 +86,11 @@ export default function Auth() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pixel-input w-full mt-1"
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                autoComplete="current-password"
               />
             </label>
             <PixelButton type="submit" variant="primary" disabled={loading} className="w-full text-[10px]">
-              {loading ? "..." : mode === "login" ? "▶ LOGIN" : "▶ SIGN UP"}
+              {loading ? "..." : "▶ LOGIN"}
             </PixelButton>
           </form>
 
@@ -112,14 +99,6 @@ export default function Auth() {
           <PixelButton type="button" onClick={google} className="w-full text-[10px]">
             ◆ CONTINUE WITH GOOGLE
           </PixelButton>
-
-          <button
-            type="button"
-            onClick={() => setMode(mode === "login" ? "signup" : "login")}
-            className="mt-4 w-full font-pixel text-[8px] text-ink underline"
-          >
-            {mode === "login" ? "NO ACCOUNT? → SIGN UP" : "HAVE AN ACCOUNT? → LOGIN"}
-          </button>
 
           <p className="mt-4 font-body text-xs text-ink/70 text-center">
             Only the admin can log in to access the database.
